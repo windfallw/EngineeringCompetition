@@ -55,8 +55,8 @@ if __name__ == '__main__':
     uploadFile('main.py')
 
     os.chdir('py')
-    # uploadFile('hcsr04.py')
-    # uploadFile('us100.py')
+    # uploadFile('hcsr04.py', 'py/hcsr04.py')
+    # uploadFile('us100.py', 'py/us100.py')
 
     pyb.exit_raw_repl()
     pyb.close()
