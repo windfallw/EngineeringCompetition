@@ -1,5 +1,6 @@
-import machine, time
 from machine import Pin
+import machine
+import utime
 
 __version__ = '0.2.0'
 __author__ = 'Roberto Sánchez'
@@ -37,10 +38,10 @@ class HCSR04:
         We use the method `machine.time_pulse_us()` to get the microseconds until the echo is received.
         """
         self.trigger.value(0)  # Stabilize the sensor
-        time.sleep_us(5)
+        utime.sleep_us(5)
         self.trigger.value(1)
         # Send a 10us pulse.
-        time.sleep_us(10)
+        utime.sleep_us(10)
         self.trigger.value(0)
         try:
             pulse_time = machine.time_pulse_us(self.echo, 1, self.echo_timeout_us)

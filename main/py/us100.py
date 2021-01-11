@@ -1,6 +1,12 @@
 import utime
 
 
+class US100:
+
+    def __init__(self):
+        ...
+
+
 class US100UART:
     """Read the US-100 sonar sensor in UART mode."""
 
