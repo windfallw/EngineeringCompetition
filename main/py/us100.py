@@ -3,7 +3,7 @@ import utime
 
 class US100:
 
-    def __init__(self):
+    def __init__(self, trigger_pin, echo_pin, ):
         ...
 
 
