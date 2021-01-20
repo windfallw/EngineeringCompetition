@@ -12,7 +12,7 @@ except:
 
 # UART1 connect with Raspberry Pi
 pi = UART(1, 115200)  # TX PA9 RX PA10
-pi.init(115200, bits=8, parity=0, stop=1)
+pi.init(115200, bits=8, parity=0, stop=1, timeout=1000)
 
 # Ultrasonic Ranging Module
 us1 = US100UART(2)  # TX PA2 RX PA3
@@ -22,12 +22,27 @@ us4 = US100UART(5)  # TX C12 RX D2
 
 
 def readUart():
-    if pi.any():
-        print(pi.read())
+    while True:
+        if pi.any():
+            print(pi.read())
+        utime.sleep_ms(50)
+
+
+async def print_ALL():
+    while True:
+        print(us1.distance, us2.distance, us3.distance, us4.distance)
+        await asyncio.sleep_ms(50)
 
 
 def sensor_thread():
-    asyncio.run(us1.read_all())
+    scheduler = asyncio.get_event_loop()
+    scheduler.create_task(us1.read_dis())
+    scheduler.create_task(us2.read_dis())
+    scheduler.create_task(us3.read_dis())
+    scheduler.create_task(us4.read_dis())
+    scheduler.create_task(print_ALL())
+    scheduler.run_forever()
 
 
 _thread.start_new_thread(sensor_thread, ())
+_thread.start_new_thread(readUart, ())
