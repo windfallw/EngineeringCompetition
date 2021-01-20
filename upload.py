@@ -51,12 +51,13 @@ if __name__ == '__main__':
     # pyb.fs_rm('config.json')
 
     os.chdir('main')
-    uploadFile('boot.py')
+    # uploadFile('boot.py')
     uploadFile('main.py')
 
     os.chdir('py')
     # uploadFile('us100.py', 'py/us100.py')
     # uploadFile('hx711.py', 'py/hx711.py')
+    # uploadFile('scales.py', 'py/scales.py')
 
     pyb.exit_raw_repl()
     pyb.close()

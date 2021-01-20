@@ -34,6 +34,7 @@ def readUart():
 async def print_ALL():
     while True:
         # print(us1.distance, us2.distance, us3.distance, us4.distance)
+        print(driver.read())
         await asyncio.sleep_ms(50)
 
 

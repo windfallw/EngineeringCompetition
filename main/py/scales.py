@@ -1,4 +1,4 @@
-from hx711 import HX711
+from .hx711 import HX711
 from utime import sleep_us
 
 
@@ -30,11 +30,3 @@ class Scales(HX711):
         for prev in values:
             weights.append(sum([1 for current in values if abs(prev - current) / (prev / 100) <= deviation]))
         return sorted(zip(values, weights), key=lambda x: x[1]).pop()[0]
-
-
-if __name__ == "__main__":
-    scales = Scales(d_out=5, pd_sck=4)
-    scales.tare()
-    val = scales.stable_value()
-    print(val)
-    scales.power_off()
