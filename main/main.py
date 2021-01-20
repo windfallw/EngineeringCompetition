@@ -1,4 +1,3 @@
-from py.us100 import US100UART
 from pyb import UART
 import _thread
 import utime
@@ -8,17 +7,21 @@ try:
 except:
     import uasyncio as asyncio
 
-# GND DT SCK VCC
+from py.us100 import US100UART
+from py.hx711 import HX711
 
 # UART1 connect with Raspberry Pi
 pi = UART(1, 115200)  # TX PA9 RX PA10
 pi.init(115200, bits=8, parity=0, stop=1, timeout=1000)
 
-# Ultrasonic Ranging Module
+# Ultrasonic Ranging Module 单位(* mm)
 us1 = US100UART(2)  # TX PA2 RX PA3
 us2 = US100UART(3)  # TX PD8 RX PD9
 us3 = US100UART(4)  # TX C10 RX C11
 us4 = US100UART(5)  # TX C12 RX D2
+
+# GND DT SCK VCC
+driver = HX711(d_out='PA4', pd_sck='PA5')
 
 
 def readUart():
@@ -30,7 +33,7 @@ def readUart():
 
 async def print_ALL():
     while True:
-        print(us1.distance, us2.distance, us3.distance, us4.distance)
+        # print(us1.distance, us2.distance, us3.distance, us4.distance)
         await asyncio.sleep_ms(50)
 
 

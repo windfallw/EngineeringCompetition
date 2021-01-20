@@ -5,7 +5,7 @@ import pyb
 import gc
 
 micropython.alloc_emergency_exception_buf(100)  # 设置紧急情况下的（栈溢出，普通RAM不足等）保险RAM分配，使在紧急情况下仍有RAM可用。
-machine.freq(168000000)  # 设置CPU频率为240MHz
+machine.freq(168000000)  # 设置CPU频率为168MHz
 gc.enable()  # 自动回收内存碎片
 
 pyb.main('main.py')
