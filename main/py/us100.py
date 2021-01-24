@@ -18,19 +18,22 @@ class US100UART:
 
     async def read_dis(self):
         while True:
-            self.uart.write(b'\x55')
-            while True:
-                await asyncio.sleep_ms(100)
-                if self.uart.any() >= 2:
-                    self.buf_dis = self.uart.read(2)
-                    self.distance = (self.buf_dis[0] * 256) + self.buf_dis[1]
-                    break
-                elif self.uart.any():
-                    self.uart.read(1)
-                    self.uart.write(b'\x55')
-                else:
-                    self.distance = None
-                    self.uart.write(b'\x55')
+            try:
+                self.uart.write(b'\x55')
+                while True:
+                    await asyncio.sleep_ms(100)
+                    if self.uart.any() >= 2:
+                        self.buf_dis = self.uart.read(2)
+                        self.distance = (self.buf_dis[0] * 256) + self.buf_dis[1]
+                        break
+                    elif self.uart.any():
+                        self.uart.read(1)
+                        self.uart.write(b'\x55')
+                    else:
+                        self.distance = None
+                        self.uart.write(b'\x55')
+            except Exception:
+                pass
 
     async def read_temper(self):
         while True:
