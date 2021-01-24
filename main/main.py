@@ -25,31 +25,37 @@ scale = Scales(d_out='PA4', pd_sck='PA5', offset=0, rate=2.23)
 scale.tare()  # 开机校正
 
 
-async def readScale():
+async def rerun(task, wait=50, *args, **kwargs):
     while True:
         try:
-            scale.stable_value()
+            await task(*args, **kwargs)
         except Exception as err:
             print(err)
         finally:
-            await asyncio.sleep_ms(50)
+            await asyncio.sleep_ms(wait)
 
 
 async def readPi():
-    while True:
-        if pi.any():
-            print(pi.read())
-        await asyncio.sleep_ms(50)
+    if pi.any():
+        print(pi.read())
 
 
 async def writePi():
+    print(us1.distance, us2.distance, us3.distance, us4.distance, scale.weight)
+
+
+async def readScales():
+    scale.stable_value(reads=3, delay_us=1)
+
+
+def readScale():
     while True:
         try:
-            print(us1.distance, us2.distance, us3.distance, us4.distance, scale.weight)
+            scale.stable_value(reads=3, delay_us=1)
         except Exception as err:
             print(err)
         finally:
-            await asyncio.sleep_ms(50)
+            utime.sleep_ms(50)
 
 
 def main_thread():
@@ -58,10 +64,11 @@ def main_thread():
     loop.create_task(us2.read_dis())
     loop.create_task(us3.read_dis())
     loop.create_task(us4.read_dis())
-    loop.create_task(readScale())
-    loop.create_task(readPi())
-    loop.create_task(writePi())
+    loop.create_task(rerun(readScales))
+    loop.create_task(rerun(readPi))
+    loop.create_task(rerun(writePi))
     loop.run_forever()
 
 
 _thread.start_new_thread(main_thread, ())
+# _thread.start_new_thread(readScale, ())
