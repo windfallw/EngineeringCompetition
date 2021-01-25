@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import gc
+import math
 
 try:
     import pyb
@@ -122,3 +123,18 @@ class WS2812:
         for index in range(end * 12, self.buf_length):
             buf[index] = off
             index += 1
+
+    def data_generator(self):
+        data = [(0, 0, 0) for i in range(self.led_count)]
+        step = 0
+        while True:
+            red = int((1 + math.sin(step * 0.1324)) * 127)
+            green = int((1 + math.sin(step * 0.1654)) * 127)
+            blue = int((1 + math.sin(step * 0.1)) * 127)
+            data[step % self.led_count] = (red, green, blue)
+            yield data
+            step += 1
+
+    def clear(self):
+        data = [(85, 85, 85) for i in range(self.led_count)]
+        self.show(data)

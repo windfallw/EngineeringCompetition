@@ -1,7 +1,6 @@
-from pyb import UART
+from pyb import UART, Pin
 import _thread
 import utime
-import math
 
 try:
     import asyncio
@@ -23,14 +22,17 @@ utime.sleep_ms(500)
 us1 = US100UART(2)  # TX PA2 RX PA3
 us2 = US100UART(3)  # TX PD8 RX PD9
 us3 = US100UART(4)  # TX C10 RX C11
-us4 = US100UART(5)  # TX C12 RX D2
+us4 = US100UART(5)  # TX C12 RX PD2
 
 # Electronic scale GND DT SCK VCC 单位(* g)
-scale = Scales(d_out='PA4', pd_sck='PA5', offset=0, rate=2.23)
+scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
 scale.tare()  # 开机校正
 
-# 24 LED ring
-ring = WS2812(spi_bus=1, led_count=24, intensity=0.1)
+# 24 RGB LED ring DOUT(PB15)
+ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
+
+# Hall sensor detect pin
+hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
 
 
 async def rerun(task, wait=50, *args, **kwargs):
@@ -58,7 +60,21 @@ async def readPi():
 
 
 async def writePi():
-    print(us1.distance, us2.distance, us3.distance, us4.distance, scale.weight)
+    print('%smm' % us1.distance, '%smm' % us2.distance, '%smm' % us3.distance, '%smm' % us4.distance,
+          '%sg' % scale.weight, hall.value())
+    ...
+
+
+async def shine():
+    for data in ring.data_generator():
+
+        if hall.value():
+            ring.clear()
+            while hall.value():
+                await asyncio.sleep_ms(0)
+
+        ring.show(data)
+        await asyncio.sleep_ms(0)
 
 
 def readScale():
@@ -79,6 +95,7 @@ def main_thread():
     loop.create_task(rerun(us4.read_distance, wait=0))
     loop.create_task(rerun(readPi))
     loop.create_task(rerun(writePi))
+    loop.create_task(shine())
     loop.run_forever()
 
 
