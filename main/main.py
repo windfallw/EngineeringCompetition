@@ -14,6 +14,9 @@ from py.scales import Scales
 pi = UART(1, 115200)  # TX PA9 RX PA10
 pi.init(115200, bits=8, parity=0, stop=1, timeout=1000)
 
+# 没加延迟开机以后读的数据会乱
+utime.sleep_ms(500)
+
 # Ultrasonic Ranging Module 单位(* mm)
 us1 = US100UART(2)  # TX PA2 RX PA3
 us2 = US100UART(3)  # TX PD8 RX PD9
@@ -26,6 +29,15 @@ scale.tare()  # 开机校正
 
 
 async def rerun(task, wait=50, *args, **kwargs):
+    """
+    捕捉协程任务异常
+
+    :param task: 协程任务
+    :param wait: 单次任务完成后等待时长
+    :param args: 函数变量
+    :param kwargs: 函数键值对变量
+    :return: None
+    """
     while True:
         try:
             await task(*args, **kwargs)
@@ -44,14 +56,10 @@ async def writePi():
     print(us1.distance, us2.distance, us3.distance, us4.distance, scale.weight)
 
 
-async def readScales():
-    scale.stable_value(reads=3, delay_us=1)
-
-
 def readScale():
     while True:
         try:
-            scale.stable_value(reads=3, delay_us=1)
+            scale.stable_value(reads=5)
         except Exception as err:
             print(err)
         finally:
@@ -60,15 +68,14 @@ def readScale():
 
 def main_thread():
     loop = asyncio.get_event_loop()
-    loop.create_task(us1.read_dis())
-    loop.create_task(us2.read_dis())
-    loop.create_task(us3.read_dis())
-    loop.create_task(us4.read_dis())
-    loop.create_task(rerun(readScales))
+    loop.create_task(rerun(us1.read_distance, wait=0))
+    loop.create_task(rerun(us2.read_distance, wait=0))
+    loop.create_task(rerun(us3.read_distance, wait=0))
+    loop.create_task(rerun(us4.read_distance, wait=0))
     loop.create_task(rerun(readPi))
     loop.create_task(rerun(writePi))
     loop.run_forever()
 
 
 _thread.start_new_thread(main_thread, ())
-# _thread.start_new_thread(readScale, ())
+_thread.start_new_thread(readScale, ())
