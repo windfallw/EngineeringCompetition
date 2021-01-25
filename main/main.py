@@ -1,14 +1,16 @@
 from pyb import UART
 import _thread
 import utime
+import math
 
 try:
     import asyncio
-except:
+except ImportError:
     import uasyncio as asyncio
 
 from py.us100 import US100UART
 from py.scales import Scales
+from py.ws2812 import WS2812
 
 # UART1 connect with Raspberry Pi
 pi = UART(1, 115200)  # TX PA9 RX PA10
@@ -26,6 +28,9 @@ us4 = US100UART(5)  # TX C12 RX D2
 # Electronic scale GND DT SCK VCC 单位(* g)
 scale = Scales(d_out='PA4', pd_sck='PA5', offset=0, rate=2.23)
 scale.tare()  # 开机校正
+
+# 24 LED ring
+ring = WS2812(spi_bus=1, led_count=24, intensity=0.1)
 
 
 async def rerun(task, wait=50, *args, **kwargs):
