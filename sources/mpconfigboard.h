@@ -3,6 +3,7 @@
 #define MICROPY_HW_FLASH_FS_LABEL   "DEVEBOXF407VG"
 
 #define MICROPY_PY_THREAD           (1)
+#define MICROPY_PY_UBINASCII_CRC32  (1)
 
 // 1 = use internal flash (1 MByte)
 // 0 = use onboard SPI flash (2 MByte) Winbond W25Q16

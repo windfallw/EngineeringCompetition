@@ -26,8 +26,6 @@ def uploadFolder(folderPath, folderDest=None):
             uploadFile(src)
 
 
-device = 'bit'
-
 if __name__ == '__main__':
     com = 'COM8'
 

@@ -135,6 +135,14 @@ class WS2812:
             yield data
             step += 1
 
+    def set_intensity(self, intensity):
+        self.intensity = intensity
+
+    def light(self):
+        self.set_intensity(1)
+        data = [(255, 255, 255) for i in range(self.led_count)]
+        self.show(data)
+
     def clear(self):
-        data = [(85, 85, 85) for i in range(self.led_count)]
+        data = [(0, 0, 0) for i in range(self.led_count)]
         self.show(data)

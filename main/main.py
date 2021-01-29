@@ -56,13 +56,14 @@ async def rerun(task, wait=50, *args, **kwargs):
 
 async def readPi():
     if pi.any():
-        print(pi.read())
+        print(pi.read(pi.any()))
 
 
 async def writePi():
-    print('%smm' % us1.distance, '%smm' % us2.distance, '%smm' % us3.distance, '%smm' % us4.distance,
-          '%sg' % scale.weight, hall.value())
-    ...
+    data = '%smm %smm %smm %smm %sg %s\r\n' % (
+        us1.distance, us2.distance, us3.distance, us4.distance, scale.weight, hall.value())
+    pi.write(data)
+    # print(data)
 
 
 async def shine():
