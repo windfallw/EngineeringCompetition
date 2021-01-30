@@ -1,6 +1,9 @@
 from pyb import UART, Pin
+import collections
+import binascii
 import _thread
 import utime
+import json
 
 try:
     import asyncio
@@ -13,7 +16,7 @@ from py.ws2812 import WS2812
 
 # UART1 connect with Raspberry Pi
 pi = UART(1, 115200)  # TX PA9 RX PA10
-pi.init(115200, bits=8, parity=0, stop=1, timeout=1000)
+pi.init(115200, bits=8, parity=None, stop=1, timeout=0)
 
 # 没加延迟开机以后读的数据会乱
 utime.sleep_ms(500)
@@ -56,14 +59,21 @@ async def rerun(task, wait=50, *args, **kwargs):
 
 async def readPi():
     if pi.any():
-        print(pi.read(pi.any()))
+        print(pi.readline())
 
 
 async def writePi():
-    data = '%smm %smm %smm %smm %sg %s\r\n' % (
-        us1.distance, us2.distance, us3.distance, us4.distance, scale.weight, hall.value())
-    pi.write(data)
-    # print(data)
+    data = collections.OrderedDict()
+    data['us1'] = us1.distance
+    data['us2'] = us2.distance
+    data['us3'] = us3.distance
+    data['us4'] = us4.distance
+    data['scale'] = scale.weight
+    data['hall'] = hall.value()
+    data['crc32'] = binascii.crc32(json.dumps(data).encode())
+    result = json.dumps(data) + '\r\n'
+    pi.write(result)
+    # print(result, end='')
 
 
 async def shine():
@@ -96,7 +106,7 @@ def main_thread():
     loop.create_task(rerun(us4.read_distance, wait=0))
     loop.create_task(rerun(readPi))
     loop.create_task(rerun(writePi))
-    loop.create_task(shine())
+    loop.create_task(rerun(shine, wait=0))
     loop.run_forever()
 
 
