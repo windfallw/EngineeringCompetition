@@ -28,6 +28,7 @@ class WS2812:
     Version: 1.0
     """
     buf_bytes = (0x88, 0x8e, 0xe8, 0xee)
+    light = False
 
     def __init__(self, spi_bus=1, led_count=1, intensity=1):
         """
@@ -138,10 +139,14 @@ class WS2812:
     def set_intensity(self, intensity):
         self.intensity = intensity
 
-    def light(self):
-        self.set_intensity(1)
+    def light_on(self):
+        self.light = True
         data = [(255, 255, 255) for i in range(self.led_count)]
         self.show(data)
+
+    def light_off(self):
+        if self.light:
+            self.light = False
 
     def clear(self):
         data = [(0, 0, 0) for i in range(self.led_count)]

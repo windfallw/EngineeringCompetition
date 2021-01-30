@@ -1,4 +1,4 @@
-from pyb import UART, Pin
+from pyb import UART, Timer, Pin
 import collections
 import binascii
 import _thread
@@ -36,6 +36,9 @@ ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
 
 # Hall sensor detect pin
 hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
+
+tim = Timer(1)
+tim.init(freq=0.1, callback=lambda t: ring.light_off())
 
 
 async def rerun(task, wait=50, *args, **kwargs):
@@ -77,15 +80,19 @@ async def writePi():
 
 
 async def shine():
-    for data in ring.data_generator():
+    while hall.value():
+        for data in ring.data_generator():
+            if not hall.value():
+                tim.counter(0)
+                ring.light_on()
+                break
+            ring.show(data)
+            await asyncio.sleep_ms(0)
 
-        if hall.value():
-            ring.clear()
-            while hall.value():
-                await asyncio.sleep_ms(0)
+    if not ring.light and not hall.value():
+        ring.clear()
 
-        ring.show(data)
-        await asyncio.sleep_ms(0)
+    await asyncio.sleep_ms(0)
 
 
 def readScale():
