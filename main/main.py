@@ -37,6 +37,7 @@ ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
 # Hall sensor detect pin
 hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
 
+# time = 1 // freq so (freq = 0.1) == (time = 10s)
 tim = Timer(1)
 tim.init(freq=0.1, callback=lambda t: ring.light_off())
 
@@ -86,6 +87,7 @@ async def shine():
                 tim.counter(0)
                 ring.light_on()
                 break
+            ring.set_intensity(ring.common_intensity)
             ring.show(data)
             await asyncio.sleep_ms(0)
 
