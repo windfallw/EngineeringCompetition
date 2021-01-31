@@ -74,10 +74,10 @@ async def writePi():
     data['us4'] = us4.distance
     data['scale'] = scale.weight
     data['hall'] = hall.value()
-    data['crc32'] = binascii.crc32(json.dumps(data).encode())
-    result = json.dumps(data) + '\r\n'
-    pi.write(result)
-    # print(result, end='')
+    result = json.dumps(data)
+    raw = b'%s|%s\r\n' % (result, binascii.crc32(result.encode()))
+    pi.write(raw)
+    # print(raw)
 
 
 async def shine():
