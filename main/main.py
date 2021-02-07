@@ -56,17 +56,29 @@ async def rerun(task, wait=50, *args, **kwargs):
         try:
             await task(*args, **kwargs)
         except Exception as err:
-            print(err)
+            ...
+            # print(err)
         finally:
             await asyncio.sleep_ms(wait)
 
 
-async def readPi():
+async def readPi(rx_split=b'#'):
     if pi.any():
-        print(pi.readline())
+        line = pi.readline()
+        print(line)
+        if line.rfind(rx_split) > 0:
+            raw = line.rsplit(rx_split, 1)
+            crc32 = int(raw[1].replace(b'\r\n', b''))
+            if crc32 == binascii.crc32(raw[0]):
+                result = raw[0].decode('utf-8', 'strict')
+                # print(result)
+            else:
+                raise Exception("crc32 checksum error")
+        else:
+            raise Exception("uart received an error data")
 
 
-async def writePi():
+async def writePi(tx_split=b'*'):
     data = collections.OrderedDict()
     data['us1'] = us1.distance
     data['us2'] = us2.distance
@@ -74,8 +86,14 @@ async def writePi():
     data['us4'] = us4.distance
     data['scale'] = scale.weight
     data['hall'] = hall.value()
-    result = json.dumps(data)
-    raw = b'%s|%s\r\n' % (result, binascii.crc32(result.encode()))
+
+    if data['hall']:
+        data['hall'] = True
+    else:
+        data['hall'] = False
+
+    result = json.dumps(data).encode('utf-8', 'strict')
+    raw = b'%s%s%d\r\n' % (result, tx_split, binascii.crc32(result))
     pi.write(raw)
     # print(raw)
 
@@ -113,8 +131,8 @@ def main_thread():
     loop.create_task(rerun(us2.read_distance, wait=0))
     loop.create_task(rerun(us3.read_distance, wait=0))
     loop.create_task(rerun(us4.read_distance, wait=0))
-    loop.create_task(rerun(readPi))
-    loop.create_task(rerun(writePi))
+    loop.create_task(rerun(writePi, wait=30, tx_split=b'*'))
+    loop.create_task(rerun(readPi, wait=50, rx_split=b'#'))
     loop.create_task(rerun(shine, wait=0))
     loop.run_forever()
 
