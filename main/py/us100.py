@@ -9,12 +9,13 @@ except:
 
 class US100UART:
     distance = None
-    temperature = None
     buf_dis = bytearray(2)
-    buf_temper = bytearray(1)
 
-    def __init__(self, uart):
-        self.uart = UART(uart, 9600)
+    # temperature = None
+    # buf_temper = bytearray(1)
+
+    def __init__(self, port):
+        self.uart = UART(port, 9600)
         self.uart.init(9600, bits=8, parity=None, stop=1, timeout=3000)
         utime.sleep_ms(100)
 
@@ -46,14 +47,15 @@ class US100UART:
                     self.uart.read(self.uart.any())
                     self.uart.write(b'\x55')
 
-    async def read_temperature(self):
-        self.uart.write(b'\x50')
-        while True:
-            await asyncio.sleep_ms(100)
-            if self.uart.any():
-                self.buf_temper = self.uart.read(1)
-                self.temperature = self.buf_temper[0] - 45
-                break
-            else:
-                self.temperature = None
-                self.uart.write(b'\x50')
+    # async def read_temperature(self):
+    #     """写着玩的"""
+    #     self.uart.write(b'\x50')
+    #     while True:
+    #         await asyncio.sleep_ms(100)
+    #         if self.uart.any():
+    #             self.buf_temper = self.uart.read(1)
+    #             self.temperature = self.buf_temper[0] - 45
+    #             break
+    #         else:
+    #             self.temperature = None
+    #             self.uart.write(b'\x50')

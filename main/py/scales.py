@@ -16,7 +16,7 @@ class Scales(HX711):
 
     def tare(self):
         self.offset = self.read()
-        print('HX711 set offset', self.offset)
+        return 'HX711 set offset %s' % self.offset
 
     def regulate(self, rate):
         """设置校正系数"""
