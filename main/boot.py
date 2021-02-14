@@ -11,6 +11,6 @@ gc.enable()  # 自动回收内存碎片
 pyb.main('main.py')
 
 # https://docs.micropython.org/en/latest/library/pyb.html#pyb.usb_mode
-# pyb.usb_mode('VCP') 仅串口模式，默认串口加硬盘挂载'VCP+MSC'
+pyb.usb_mode('VCP')  # 仅串口模式，默认串口加硬盘挂载'VCP+MSC'
 
 print(pyb.usb_mode())

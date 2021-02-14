@@ -11,8 +11,8 @@ class US100UART:
     distance = None
     buf_dis = bytearray(2)
 
-    # temperature = None
-    # buf_temper = bytearray(1)
+    temperature = None
+    buf_temper = bytearray(1)
 
     def __init__(self, port):
         self.uart = UART(port, 9600)
@@ -47,15 +47,15 @@ class US100UART:
                     self.uart.read(self.uart.any())
                     self.uart.write(b'\x55')
 
-    # async def read_temperature(self):
-    #     """写着玩的"""
-    #     self.uart.write(b'\x50')
-    #     while True:
-    #         await asyncio.sleep_ms(100)
-    #         if self.uart.any():
-    #             self.buf_temper = self.uart.read(1)
-    #             self.temperature = self.buf_temper[0] - 45
-    #             break
-    #         else:
-    #             self.temperature = None
-    #             self.uart.write(b'\x50')
+    async def read_temperature(self):
+        """写着玩的"""
+        self.uart.write(b'\x50')
+        while True:
+            await asyncio.sleep_ms(100)
+            if self.uart.any():
+                self.buf_temper = self.uart.read(1)
+                self.temperature = self.buf_temper[0] - 45
+                break
+            else:
+                self.temperature = None
+                self.uart.write(b'\x50')

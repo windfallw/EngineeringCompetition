@@ -56,7 +56,7 @@ class RaspberryPi:
     def parseData(self, data):
         """准备执行任务"""
         if 'id' and 'func' and 'kwargs' in data:
-            if self.current_task_id is not data['id']:
+            if self.current_task_id != data['id']:
                 # 接收新任务并重置状态。
                 self.current_task_id = data['id']
                 self.current_task_status = False

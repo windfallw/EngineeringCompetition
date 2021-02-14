@@ -1,6 +1,11 @@
 from .hx711 import HX711
 from utime import sleep_us
 
+try:
+    import asyncio
+except ImportError:
+    import uasyncio as asyncio
+
 
 class Scales(HX711):
     weight = None

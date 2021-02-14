@@ -148,7 +148,7 @@ class WS2812:
         data = [(255, 255, 255) for i in range(self.led_count)]
         self.show(data)
 
-    def light_off(self):
+    def light_off(self, tim):
         if self.light:
             self.light = False
 

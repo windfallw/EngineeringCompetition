@@ -1,7 +1,6 @@
 from pyb import Timer, Pin, hard_reset
 import _thread
 import utime
-import gc
 
 try:
     import asyncio
@@ -33,12 +32,12 @@ ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
 hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
 
 # time = 1 // freq so (freq = 0.1) == (time = 10s)
-tim = Timer(1)
-tim.init(freq=0.1, callback=lambda t: ring.light_off())
+tim = Timer(1, freq=0.1)
+tim.callback(ring.light_off)
 
 
 def errorHandler(func):
-    """用于修饰响应树莓派命令的函数"""
+    """修饰响应树莓派命令的函数"""
 
     def inner_function(*args, **kwargs):
         try:
@@ -73,6 +72,14 @@ def reboot(kwargs):
 allow_func = {'offset': offset, 'reboot': reboot}
 
 
+async def readData():
+    """读取树莓派发送的指令并执行"""
+    task = pi.readline()
+    if task is not None:
+        if task[0] in allow_func:
+            allow_func[task[0]](task[1])
+
+
 async def writeData():
     """读取当前所有传感器信息并发送给树莓派"""
     pi.us100['us1'] = us1.distance
@@ -86,15 +93,6 @@ async def writeData():
         pi.data['hall'] = False
     pi.writeline()
     # print(pi.raw)
-
-
-async def readData():
-    """读取树莓派发送的指令并执行"""
-    task = pi.readline()
-    if task is not None:
-        code = task[0] + '(kwargs)'
-        eval(code, allow_func, {'kwargs': task[1]})
-        gc.collect()
 
 
 async def shine():
@@ -142,15 +140,15 @@ def async_thread():
     loop.create_task(rerun(us3.read_distance, wait=0))
     loop.create_task(rerun(us4.read_distance, wait=0))
 
-    loop.create_task(rerun(writeData, wait=30))
     loop.create_task(rerun(readData, wait=50))
+    loop.create_task(rerun(writeData, wait=50))
 
-    loop.create_task(rerun(shine, wait=0))
+    loop.create_task(rerun(shine, wait=50))
     loop.run_forever()
 
 
 def main_thread():
-    """用于读电子秤，单独一个线程是因为电子秤取得稳定的值需要较久，而改成协程又过于冗余繁琐。减少每次权重取值的reads数可以加快。"""
+    """用于读电子秤，单独一个线程是因为电子秤取得稳定的值需要较多延迟函数，而改成协程又过于冗余繁琐。减少每次权重取值的reads数可以加快。"""
     while True:
         try:
             scale.stable_value(reads=5)
@@ -163,4 +161,4 @@ def main_thread():
 _thread.start_new_thread(async_thread, ())
 _thread.start_new_thread(main_thread, ())
 
-# 这里不要运行死循环，否则串口终端会阻塞，且进入raw REPL mode上传代码也容易卡顿。
+# 主程序不要运行死循环，否则串口终端会阻塞，且进入raw REPL mode上传代码也容易卡顿。

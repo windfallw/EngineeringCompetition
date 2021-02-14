@@ -27,7 +27,7 @@ class HX711(object):
     DATA_BITS = const(24)
     MAX_VALUE = const(0x7fffff)
     MIN_VALUE = const(0x800000)
-    READY_TIMEOUT_SEC = const(5)
+    READY_TIMEOUT_SEC = const(3)
     SLEEP_DELAY_USEC = const(80)
 
     def __init__(self, d_out, pd_sck, channel: int = CHANNEL_A_128):
