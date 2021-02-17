@@ -1,5 +1,4 @@
 from pyb import UART
-import utime
 
 try:
     import asyncio
@@ -17,7 +16,6 @@ class US100UART:
     def __init__(self, port):
         self.uart = UART(port, 9600)
         self.uart.init(9600, bits=8, parity=None, stop=1, timeout=3000)
-        utime.sleep_ms(100)
 
     def isDistance(self):
         if self.uart.any() and self.uart.any() % 2 == 0:

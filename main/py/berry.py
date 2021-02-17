@@ -1,7 +1,6 @@
 from pyb import UART
 import collections
 import binascii
-import utime
 import json
 
 
@@ -32,7 +31,6 @@ class RaspberryPi:
     def __init__(self, port):
         self.uart = UART(port, 115200)  # TX PA9 RX PA10
         self.uart.init(115200, bits=8, parity=None, stop=1, timeout=0)
-        utime.sleep_ms(500)  # 没加延迟开机以后读的数据会乱
 
     def __repr__(self):
         return 'stm32 & RaspberryPi Communication via Uart'

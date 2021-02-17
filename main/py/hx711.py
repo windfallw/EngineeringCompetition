@@ -3,18 +3,6 @@ from machine import Pin
 from micropython import const
 
 
-class HX711Exception(Exception):
-    pass
-
-
-class InvalidMode(HX711Exception):
-    pass
-
-
-class DeviceIsNotReady(HX711Exception):
-    pass
-
-
 class HX711(object):
     """
     Micropython driver for Avia Semiconductor's HX711
@@ -27,7 +15,7 @@ class HX711(object):
     DATA_BITS = const(24)
     MAX_VALUE = const(0x7fffff)
     MIN_VALUE = const(0x800000)
-    READY_TIMEOUT_SEC = const(3)
+    READY_TIMEOUT_SEC = const(1)
     SLEEP_DELAY_USEC = const(80)
 
     def __init__(self, d_out, pd_sck, channel: int = CHANNEL_A_128):
@@ -66,7 +54,7 @@ class HX711(object):
         t0 = time()
         while not self.is_ready():
             if time() - t0 > self.READY_TIMEOUT_SEC:
-                raise DeviceIsNotReady()
+                raise Exception("DeviceIsNotReady")
 
     @property
     def channel(self) -> tuple:
@@ -90,7 +78,7 @@ class HX711(object):
         HX711.CHANNEL_B_32 - Channel B with gain 32
         """
         if value not in (self.CHANNEL_A_128, self.CHANNEL_A_64, self.CHANNEL_B_32):
-            raise InvalidMode('Gain should be one of HX711.CHANNEL_A_128, HX711.CHANNEL_A_64, HX711.CHANNEL_B_32')
+            raise Exception('Gain should be one of HX711.CHANNEL_A_128, HX711.CHANNEL_A_64, HX711.CHANNEL_B_32')
         else:
             self._channel = value
 

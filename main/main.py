@@ -1,6 +1,5 @@
 from pyb import Timer, Pin, hard_reset
 import _thread
-import utime
 
 try:
     import asyncio
@@ -11,29 +10,6 @@ from py.berry import RaspberryPi
 from py.us100 import US100UART
 from py.scales import Scales
 from py.ws2812 import WS2812
-
-# UART1 connect with Raspberry Pi
-pi = RaspberryPi(port=1)
-
-# Ultrasonic Ranging Module 单位(* mm)
-us1 = US100UART(port=2)  # TX PA2 RX PA3
-us2 = US100UART(port=3)  # TX PD8 RX PD9
-us3 = US100UART(port=4)  # TX C10 RX C11
-us4 = US100UART(port=5)  # TX C12 RX PD2
-
-# Electronic scale GND DT SCK VCC 单位(* g)
-scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
-scale.tare()  # 开机校正
-
-# 24 RGB LED ring DOUT(PB15)
-ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
-
-# Hall sensor detect pin
-hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
-
-# time = 1 // freq so (freq = 0.1) == (time = 10s)
-tim = Timer(1, freq=0.1)
-tim.callback(ring.light_off)
 
 
 def errorHandler(func):
@@ -55,7 +31,7 @@ def errorHandler(func):
 @errorHandler
 def offset(kwargs):
     """重置电子秤偏移值"""
-    pi.current_task_msg = scale.tare()
+    pi.current_task_msg = 'hx711 set offset %s' % scale.offset
     pi.current_task_data['offset'] = scale.offset
 
 
@@ -86,11 +62,17 @@ async def writeData():
     pi.us100['us2'] = us2.distance
     pi.us100['us3'] = us3.distance
     pi.us100['us4'] = us4.distance
-    pi.data['scale'] = scale.weight
+
+    if scale:
+        pi.data['scale'] = scale.weight
+    else:
+        pi.data['scale'] = None
+
     if hall.value():
         pi.data['hall'] = True
     else:
         pi.data['hall'] = False
+
     pi.writeline()
     # print(pi.raw)
 
@@ -148,17 +130,49 @@ def async_thread():
 
 
 def main_thread():
-    """用于读电子秤，单独一个线程是因为电子秤取得稳定的值需要较多延迟函数，而改成协程又过于冗余繁琐。减少每次权重取值的reads数可以加快。"""
+    """支持热插拔，用于读电子秤，单独一个线程是因为电子秤取得稳定的值需要较多延迟函数，而改成协程又过于冗余繁琐。减少每次权重取值的reads数可以加快。"""
+    global scale
     while True:
         try:
-            scale.stable_value(reads=5)
-        except Exception as err:
-            print(err)
-        finally:
-            utime.sleep_ms(50)
+            if scale is None:
+                scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
+            else:
+                scale.stable_value(reads=5)
+        except Exception as error:
+            if str(error) == 'DeviceIsNotReady':
+                scale = None
+            else:
+                print(error)
 
 
-_thread.start_new_thread(async_thread, ())
-_thread.start_new_thread(main_thread, ())
+if __name__ == '__main__':
+    # UART1 connect with Raspberry Pi
+    pi = RaspberryPi(port=1)
+
+    # Ultrasonic Ranging Module 单位(* mm)
+    us1 = US100UART(port=2)  # TX PA2 RX PA3
+    us2 = US100UART(port=3)  # TX PD8 RX PD9
+    us3 = US100UART(port=4)  # TX C10 RX C11
+    us4 = US100UART(port=5)  # TX C12 RX PD2
+
+    # Electronic scale GND DT SCK VCC 单位(* g)
+    try:
+        scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
+    except Exception as err:
+        scale = None
+        print(err)
+
+    # 24 RGB LED ring DOUT(PB15)
+    ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
+
+    # Hall sensor detect pin
+    hall = Pin('PD3', Pin.IN, Pin.PULL_UP)
+
+    # time = 1 // freq so (freq = 0.1) == (time = 10s)
+    tim = Timer(1, freq=0.1)
+    tim.callback(ring.light_off)
+
+    _thread.start_new_thread(async_thread, ())
+    _thread.start_new_thread(main_thread, ())
 
 # 主程序不要运行死循环，否则串口终端会阻塞，且进入raw REPL mode上传代码也容易卡顿。
