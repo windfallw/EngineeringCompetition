@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # uploadFile('hx711.py', 'py/hx711.py')
     # uploadFile('scales.py', 'py/scales.py')
     # uploadFile('ws2812.py', 'py/ws2812.py')
-    # uploadFile('berry.py', 'py/berry.py')
+    uploadFile('berry.py', 'py/berry.py')
 
     pyb.exit_raw_repl()
     pyb.close()

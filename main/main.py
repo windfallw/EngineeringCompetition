@@ -18,10 +18,12 @@ def errorHandler(func):
     def inner_function(*args, **kwargs):
         try:
             func(*args, **kwargs)
-            pi.current_task_status = True
+            pi.result['code'] = 200
+
         except Exception as err:
-            pi.current_task_status = False
-            pi.current_task_msg = str(err)
+            pi.result['code'] = 401
+            pi.result['msg'] = str(err)
+
         finally:
             pi.write_task_result()
 
@@ -29,27 +31,29 @@ def errorHandler(func):
 
 
 @errorHandler
-def offset(kwargs):
-    """重置电子秤偏移值"""
-    pi.current_task_msg = 'hx711 set offset %s' % scale.offset
-    pi.current_task_data['offset'] = scale.offset
+def set_offset(kwargs):
+    """设置电子秤偏移值"""
+
+    pi.result['msg'] = 'hx711 set offset %s' % scale.offset
+    pi.result['data'] = {'offset': scale.offset}
 
 
 @errorHandler
 def reboot(kwargs):
-    """需要在重启前将响应信息发送。"""
-    pi.current_task_status = True
-    pi.current_task_msg = 'rebooting...'
+    pi.result['code'] = 200
+    pi.result['msg'] = 'rebooting'
+    # 在重启前将响应信息发送。
     pi.write_task_result()
     hard_reset()
 
 
 # eval or exec允许访问的函数
-allow_func = {'offset': offset, 'reboot': reboot}
+allow_func = {'offset': set_offset, 'reboot': reboot}
 
 
 async def readData():
     """读取树莓派发送的指令并执行"""
+
     task = pi.readline()
     if task is not None:
         if task[0] in allow_func:
@@ -58,6 +62,7 @@ async def readData():
 
 async def writeData():
     """读取当前所有传感器信息并发送给树莓派"""
+
     pi.us100['us1'] = us1.distance
     pi.us100['us2'] = us2.distance
     pi.us100['us3'] = us3.distance
@@ -65,20 +70,22 @@ async def writeData():
 
     if scale:
         pi.data['scale'] = scale.weight
+        pi.data['offset'] = scale.offset
     else:
         pi.data['scale'] = None
+        pi.data['offset'] = None
 
     if hall.value():
         pi.data['hall'] = True
     else:
         pi.data['hall'] = False
 
-    pi.writeline()
-    # print(pi.raw)
+    pi.writeline(pi.data)
 
 
 async def shine():
     """刷新打光灯状态"""
+
     while hall.value():
         for data in ring.data_generator():
             if not hall.value():
@@ -105,6 +112,7 @@ async def rerun(task, wait=50, *args, **kwargs):
     :param kwargs: 函数键值对变量
     :return: None
     """
+
     while True:
         try:
             await task(*args, **kwargs)
@@ -116,6 +124,7 @@ async def rerun(task, wait=50, *args, **kwargs):
 
 def async_thread():
     """协程+多线程"""
+
     loop = asyncio.get_event_loop()
     loop.create_task(rerun(us1.read_distance, wait=0))
     loop.create_task(rerun(us2.read_distance, wait=0))
@@ -131,6 +140,7 @@ def async_thread():
 
 def main_thread():
     """支持热插拔，用于读电子秤，单独一个线程是因为电子秤取得稳定的值需要较多延迟函数，而改成协程又过于冗余繁琐。减少每次权重取值的reads数可以加快。"""
+
     global scale
     while True:
         try:
