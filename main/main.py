@@ -37,10 +37,12 @@ def set_offset(kwargs):
 
     if 'offset' in kwargs:
         scale.offset = kwargs['offset']
-    else:
-        scale.offset = scale.weight
+        pi.result['msg'] = 'set offset %s' % scale.offset
 
-    pi.result['msg'] = 'hx711 set offset %s' % scale.offset
+    else:
+        scale.offset = scale.raw
+        pi.result['msg'] = 'auto set offset %s' % scale.raw
+
     pi.result['data'] = {'offset': scale.offset}
 
 

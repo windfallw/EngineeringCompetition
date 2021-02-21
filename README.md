@@ -9,3 +9,4 @@
 - [micropython crc32模块编译](https://forum.micropython.org/viewtopic.php?t=648)
 - [Stm32 GPIO模式详解](https://www.cnblogs.com/chris-cp/p/3937762.html)
 - [Pyboard基础功能-定时器](https://www.cnblogs.com/iBoundary/p/11514209.html)
+- [UART lost bytes / buffer overflow issue](https://forum.micropython.org/viewtopic.php?t=6244)

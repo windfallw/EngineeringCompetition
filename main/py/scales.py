@@ -3,6 +3,7 @@ from utime import sleep_us
 
 
 class Scales(HX711):
+    raw = None
     weight = None
 
     def __init__(self, d_out, pd_sck, offset=0, rate=1):
@@ -24,7 +25,8 @@ class Scales(HX711):
         self.calibrate = rate
 
     def raw_value(self):
-        return self.read() - self.offset
+        self.raw = self.read()
+        return self.raw - self.offset
 
     def stable_value(self, reads=10, delay_us=500):
         """单位g"""
