@@ -19,8 +19,7 @@ class RaspberryPi:
 
     data = collections.OrderedDict()
     data['us100'] = us100
-    data['scale'] = None
-    data['offset'] = None
+    data['scale'] = {'weight': None, 'offset': None}
     data['hall'] = None
 
     result = {'code': 401, 'data': {}, 'msg': ''}
@@ -30,11 +29,12 @@ class RaspberryPi:
     }
 
     def __init__(self, port):
-        self.uart = UART(port, 115200)  # TX PA9 RX PA10
-        self.uart.init(115200, bits=8, parity=None, stop=1, timeout=0)
+        self.uart = UART(port, 921600)  # TX PA9 RX PA10
+        self.uart.init(921600, bits=8, parity=None, stop=1, timeout=0, read_buf_len=512)
 
     def __repr__(self):
-        return 'stm32 & RaspberryPi Communication via Uart'
+        print(self.uart)
+        return 'STM32 & RaspberryPi Communication via Uart'
 
     def writeline(self, data):
         result = json.dumps(data).encode('utf-8', 'strict')
@@ -67,8 +67,4 @@ class RaspberryPi:
                     result = json.loads(raw[0].decode('utf-8', 'strict'))
                     return self.parseData(result)
 
-                else:
-                    raise Exception("crc32 checksum error")
-
-            else:
-                raise Exception("uart received an error data")
+            print(self.rx_raw_line)

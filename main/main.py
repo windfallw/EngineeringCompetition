@@ -12,7 +12,7 @@ from py.scales import Scales
 from py.ws2812 import WS2812
 
 
-def errorHandler(func):
+def funcHandler(func):
     """修饰响应树莓派命令的函数"""
 
     def inner_function(*args, **kwargs):
@@ -30,15 +30,41 @@ def errorHandler(func):
     return inner_function
 
 
-@errorHandler
+@funcHandler
 def set_offset(kwargs):
-    """设置电子秤偏移值"""
+    if scale is None:
+        raise Exception("电子秤异常")
+
+    if 'offset' in kwargs:
+        scale.offset = kwargs['offset']
+    else:
+        scale.offset = scale.weight
 
     pi.result['msg'] = 'hx711 set offset %s' % scale.offset
     pi.result['data'] = {'offset': scale.offset}
 
 
-@errorHandler
+@funcHandler
+def ws2812(kwargs):
+    if 'force_open' in kwargs:
+        if {'rgb_intensity', 'light_intensity', 'light_rgb'} <= set(kwargs):
+            ring.rgb_intensity = kwargs['rgb_intensity']
+            ring.light_intensity = kwargs['light_intensity']
+            ring.light_rgb = kwargs['light_rgb']
+            pi.result['msg'] = 'config save done'
+            if ring.light:
+                ring.light = False
+        if kwargs['force_open']:
+            ring.force_open = True
+
+    pi.result['data'] = {
+        'rgb_intensity': ring.rgb_intensity,
+        'light_intensity': ring.light_intensity,
+        'light_rgb': ring.light_rgb
+    }
+
+
+@funcHandler
 def reboot(kwargs):
     pi.result['code'] = 200
     pi.result['msg'] = 'rebooting'
@@ -48,7 +74,7 @@ def reboot(kwargs):
 
 
 # eval or exec允许访问的函数
-allow_func = {'offset': set_offset, 'reboot': reboot}
+allow_func = {'set_offset': set_offset, 'ws2812': ws2812, 'reboot': reboot}
 
 
 async def readData():
@@ -58,6 +84,10 @@ async def readData():
     if task is not None:
         if task[0] in allow_func:
             allow_func[task[0]](task[1])
+        else:
+            pi.result['code'] = 401
+            pi.result['msg'] = "不支持的方法!"
+            pi.write_task_result()
 
 
 async def writeData():
@@ -69,11 +99,9 @@ async def writeData():
     pi.us100['us4'] = us4.distance
 
     if scale:
-        pi.data['scale'] = scale.weight
-        pi.data['offset'] = scale.offset
+        pi.data['scale'] = {'weight': scale.weight, 'offset': scale.offset}
     else:
         pi.data['scale'] = None
-        pi.data['offset'] = None
 
     if hall.value():
         pi.data['hall'] = True
@@ -92,11 +120,17 @@ async def shine():
                 tim.counter(0)
                 ring.light_on()
                 break
-            ring.set_intensity(ring.common_intensity)
+            ring.set_intensity(ring.rgb_intensity)
             ring.show(data)
             await asyncio.sleep_ms(0)
 
-    if not ring.light and not hall.value():
+    if ring.force_open:
+        ring.force_open = False
+        tim.counter(0)
+        if not ring.light:
+            ring.light_on()
+
+    elif not ring.light and not hall.value():
         ring.clear()
 
     await asyncio.sleep_ms(0)

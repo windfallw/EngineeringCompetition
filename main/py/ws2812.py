@@ -30,8 +30,11 @@ class WS2812:
     buf_bytes = (0x88, 0x8e, 0xe8, 0xee)
 
     light = False
-    common_intensity = 0.1
+    force_open = False
+
+    rgb_intensity = 0.1
     light_intensity = 1
+    light_rgb = [255, 255, 255]
 
     def __init__(self, spi_bus=1, led_count=1, intensity=1):
         """
@@ -41,7 +44,7 @@ class WS2812:
         * intensity = light intensity (float up to 1)
         """
         self.led_count = led_count
-        self.intensity = self.common_intensity = intensity
+        self.intensity = self.rgb_intensity = intensity
 
         # prepare SPI data buffer (4 bytes for each color)
         self.buf_length = self.led_count * 3 * 4
@@ -143,9 +146,9 @@ class WS2812:
         self.intensity = intensity
 
     def light_on(self):
-        self.set_intensity(self.light_intensity)
         self.light = True
-        data = [(255, 255, 255) for i in range(self.led_count)]
+        self.set_intensity(self.light_intensity)
+        data = [self.light_rgb for i in range(self.led_count)]
         self.show(data)
 
     def light_off(self, tim):
