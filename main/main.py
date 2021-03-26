@@ -7,6 +7,7 @@ except ImportError:
     import uasyncio as asyncio
 
 from py.berry import RaspberryPi
+from py.motor import NEMA17
 from py.us100 import US100UART
 from py.scales import Scales
 from py.ws2812 import WS2812
@@ -192,7 +193,7 @@ def main_thread():
 
 
 if __name__ == '__main__':
-    # UART1 connect with Raspberry Pi
+    # UART1 connect with Raspberry Pi TX PA9 RX PA10
     pi = RaspberryPi(port=1)
 
     # Ultrasonic Ranging Module 单位(* mm)
@@ -201,12 +202,13 @@ if __name__ == '__main__':
     us3 = US100UART(port=4)  # TX C10 RX C11
     us4 = US100UART(port=5)  # TX C12 RX PD2
 
-    # Electronic scale GND DT SCK VCC 单位(* g)
-    try:
-        scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
-    except Exception as err:
-        scale = None
-        print(err)
+    # Electronic scale GND DT SCK VCC 单位(* g) 电子称模块暂时废弃
+    scale = None
+    # try:
+    #     scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
+    # except Exception as err:
+    #     scale = None
+    #     print(err)
 
     # 24 RGB LED ring DOUT(PB15)
     ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
@@ -219,6 +221,9 @@ if __name__ == '__main__':
     tim.callback(ring.light_off)
 
     _thread.start_new_thread(async_thread, ())
-    _thread.start_new_thread(main_thread, ())
+    # _thread.start_new_thread(main_thread, ())
+
+    # m1 = NEMA17(en=5, step=16, direction=17)
+    # m2 = NEMA17(en=25, step=26, direction=27)
 
 # 主程序不要运行死循环，否则串口终端会阻塞，且进入raw REPL mode上传代码也容易卡顿。

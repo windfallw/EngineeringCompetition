@@ -27,7 +27,7 @@ def uploadFolder(folderPath, folderDest=None):
 
 
 if __name__ == '__main__':
-    com = 'COM4'
+    com = 'COM13'
 
     print('\033[1m')
     pyb = pyboard.Pyboard(com)
@@ -58,6 +58,7 @@ if __name__ == '__main__':
     # uploadFile('scales.py', 'py/scales.py')
     # uploadFile('ws2812.py', 'py/ws2812.py')
     # uploadFile('berry.py', 'py/berry.py')
+    uploadFile('motor.py', 'py/motor.py')
 
     pyb.exit_raw_repl()
     pyb.close()
