@@ -203,12 +203,11 @@ if __name__ == '__main__':
     us4 = US100UART(port=5)  # TX C12 RX PD2
 
     # Electronic scale GND DT SCK VCC 单位(* g) 电子称模块暂时废弃
-    scale = None
-    # try:
-    #     scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
-    # except Exception as err:
-    #     scale = None
-    #     print(err)
+    try:
+        scale = Scales(d_out='PC4', pd_sck='PC5', offset=0, rate=2.23)
+    except Exception as err:
+        scale = None
+        print(err)
 
     # 24 RGB LED ring DOUT(PB15)
     ring = WS2812(spi_bus=2, led_count=24, intensity=0.1)
@@ -221,7 +220,7 @@ if __name__ == '__main__':
     tim.callback(ring.light_off)
 
     _thread.start_new_thread(async_thread, ())
-    # _thread.start_new_thread(main_thread, ())
+    _thread.start_new_thread(main_thread, ())
 
     # m1 = NEMA17(en='PD6', step='PE9', direction='PD1')
     # m2 = NEMA17(en='PD7', step='PE11', direction='PD5')
