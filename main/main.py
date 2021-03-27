@@ -223,7 +223,7 @@ if __name__ == '__main__':
     _thread.start_new_thread(async_thread, ())
     # _thread.start_new_thread(main_thread, ())
 
-    # m1 = NEMA17(en=5, step=16, direction=17)
-    # m2 = NEMA17(en=25, step=26, direction=27)
+    # m1 = NEMA17(en='PD6', step='PE9', direction='PD1')
+    # m2 = NEMA17(en='PD7', step='PE11', direction='PD5')
 
 # 主程序不要运行死循环，否则串口终端会阻塞，且进入raw REPL mode上传代码也容易卡顿。
