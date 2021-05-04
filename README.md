@@ -6,6 +6,8 @@
 
 ![demo video](sources/readme/demo.gif)
 
+![demo jpg](sources/readme/demo.jpg)
+
 ## 使用说明
 
 ## 参考资料
