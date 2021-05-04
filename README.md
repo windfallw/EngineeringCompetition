@@ -2,6 +2,12 @@
 
 工训赛-智能分类垃圾桶（硬件）
 
+止步于校赛 🙂
+
+[![demo video](sources/readme/demo.jpg)](sources/readme/demo.mp4)
+
+## 使用说明
+
 ## 参考资料
 
 - [MCUDEV_DEVEBOX_F407VGT6](https://github.com/mcauser/MCUDEV_DEVEBOX_F407VGT6)
