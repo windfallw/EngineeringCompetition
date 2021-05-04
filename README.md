@@ -27,9 +27,13 @@ MCU通过串口跟树莓派交互, 传输协议是自定的附带CRC32校验。
 
 `STM32F407VGT6`的`MicroPython`固件需要自己编译 ( 协程加多线程用起来特爽
 
-使用了好多开源库在此表示感谢就不一一列出了。
+使用了好多开源库在此表示感谢。
 
-## 参考资料
+- [micropython-ws2812](https://github.com/JanBednarik/micropython-ws2812)
+- [micropython-hx711](https://github.com/SergeyPiskunov/micropython-hx711)
+- [microbit_us100](https://github.com/fizban99/microbit_us100)
+
+## 很有用的参考资料
 
 - [MCUDEV_DEVEBOX_F407VGT6](https://github.com/mcauser/MCUDEV_DEVEBOX_F407VGT6)
 - [fix the board always go in safe boot mode](https://forum.micropython.org/viewtopic.php?f=12&t=4872&start=10)
