@@ -4,7 +4,7 @@
 
 止步于校赛 🙂
 
-[![demo video](sources/readme/demo.jpg)](sources/readme/demo.mp4)
+![demo video](sources/readme/demo.gif)
 
 ## 使用说明
 
