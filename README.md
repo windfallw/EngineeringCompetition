@@ -27,6 +27,10 @@ MCU通过串口跟树莓派交互, 传输协议是自定的附带CRC32校验。
 
 `STM32F407VGT6`的`MicroPython`固件需要自己编译 ( 协程加多线程用起来特爽
 
+编译好的`MicroPython`固件在[这里](https://github.com/windfallw/EngineeringCompetition/tree/master/sources/dfu)
+
+**这块板子刷`MicroPython`不能通过按键在安全引导和正常运行之间切换，所以如果要进入安全引导模式就只能刷对应的固件。 (看参考资料第二条)**
+
 使用了好多开源库在此表示感谢。
 
 - [micropython-ws2812](https://github.com/JanBednarik/micropython-ws2812)
